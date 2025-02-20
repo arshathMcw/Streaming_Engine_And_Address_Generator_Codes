@@ -1,5 +1,8 @@
 /*
-My idea is to have 2 streaming engine , one is for image and another for 
+My idea is to have 2 streaming engine , one is for image and another for colours
+And 2 Address generator 
+    One if for having the address at result matrix and another is for having the value at result matrix
+This is just because i am doing operation for each channel seperately , So i need to take the result value which is in ouput when i do for 2nd channel (Blue)
 */
 
 
