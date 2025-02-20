@@ -71,7 +71,6 @@ int main(){
     saTemplate.ICNT0 = col2;
     saTemplate.ICNT1 = row1; 
     saTemplate.DIM1 = col2;   
-    
     __SA0_OPEN(saTemplate);
     for(int r = 0;r < row1;r++){
         mat2Idx = &mat2[0][0];
@@ -112,6 +111,9 @@ int main(){
             // cout<<res2[r][c]<<" ";
         }
     }
+    __SA0_CLOSE();
+    __SE0_CLOSE();
+    __SE1_CLOSE();
     cout<<"Iteration 1 : "<<iteration1<<endl;
     cout<<"Iteration 2 : "<<iteration2<<endl;
     cout<<"Intrinsics Code is "<<(iteration1/iteration2)<<" times better than Scalar Code"<<endl;
