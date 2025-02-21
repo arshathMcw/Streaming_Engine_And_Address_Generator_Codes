@@ -5,18 +5,14 @@
 using namespace std;
 using namespace cv;
 using namespace c7x;
-// __vaddw_vkv
 int main() {
     float intensity[3];
-    intensity[0] = 0.1;
-    intensity[1] = 0.1;
-    intensity[2] = 0.5;
-    // cout<<"Enter Brightness for Red : ";
-    // cin>>red;
-    // cout<<"Enter Brightness for Green : ";
-    // cin>>green;
-    // cout<<"Enter Brightness for Blue : ";
-    // cin>>blue;
+    cout<<"Enter Brightness for Red : ";
+    cin>>intensity[0];
+    cout<<"Enter Brightness for Green : ";
+    cin>>intensity[1];
+    cout<<"Enter Brightness for Blue : ";
+    cin>>intensity[2];
     Mat image = imread("image.png");
     if (image.empty()) {
         cout << "Could not open or find the image!" << endl;
