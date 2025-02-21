@@ -38,24 +38,6 @@ int main() {
         }
     }
 
-    __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
-    seTemplate.ELETYPE   = se_eletype<float_vec>::value;
-    seTemplate.VECLEN    = se_veclen<float_vec>::value;
-    seTemplate.DIMFMT = __SE_DIMFMT_3D;
-    seTemplate.ICNT0 = width;
-    seTemplate.ICNT1 = height;  
-    seTemplate.DIM1 = width;
-    seTemplate.ICNT2 = channel;      
-    seTemplate.DIM2 = (width * height);
-
-
-    __SE_TEMPLATE_v1 seTemplate2 = __gen_SE_TEMPLATE_v1();
-    seTemplate2.ELETYPE   = se_eletype<float_vec>::value;
-    seTemplate2.VECLEN    = se_veclen<float_vec>::value;
-    seTemplate2.DIMFMT = __SE_DIMFMT_1D;
-    seTemplate2.ICNT0 = channel;
-    seTemplate2.ELEDUP    = __SE_ELEDUP_16X;
-
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
     saTemplate.VECLEN    = sa_veclen<int_vec>::value;
     saTemplate.DIMFMT = __SA_DIMFMT_2D;
@@ -63,28 +45,29 @@ int main() {
     saTemplate.ICNT1 = height; 
     saTemplate.DIM1 = width;  
     
-    float colors[3] = {0.299f,0.587f,0.114f};
+    float_vec constR = float_vec(0.299f);
+    float_vec constG = float_vec(0.299f);
+    float_vec constB = float_vec(0.299f);
     int iteration = 0;
     int times = (height * width) / vec_len;
-    __SE1_OPEN((void *)&colors[0], seTemplate2);
-    __SE0_OPEN((void *)&input[0][0][0], seTemplate);
-    for(int ch = 0;ch < 3;ch++){
-        __SA0_OPEN(saTemplate);
-        __SA1_OPEN(saTemplate);
-        float_vec color = strm_eng<1, float_vec>::get_adv();
-        for(int t = 0;t < times;t++){
-            iteration++;
-            float_vec curr = __vmpysp_vvv(color,strm_eng<0, float_vec>::get_adv());
-            float_vec temp = * strm_agen<1, float_vec>::get_adv((void *)output);
-            float_vec res = __vaddsp_vvv(curr,temp);
-            __vpred pred = strm_agen<0, float_vec>::get_vpred();
-            float_vec * addr = strm_agen<0, float_vec>::get_adv(&output[0][0]);
-            __vstore_pred(pred, addr, res);
-        }
-        __SA1_CLOSE();
-        __SA0_CLOSE();
+    __SA0_OPEN(saTemplate);
+    __SA1_OPEN(saTemplate);
+    __SA2_OPEN(saTemplate);
+    __SA3_OPEN(saTemplate);
+    for(int t = 0;t < times;t++){
+        iteration++;
+        float_vec red = __vmpysp_vvv(constR,* strm_agen<0, float_vec>::get_adv(&input[0][0][0]));
+        float_vec green = __vmpysp_vvv(constG,* strm_agen<1, float_vec>::get_adv(&input[1][0][0]));
+        float_vec blue = __vmpysp_vvv(constB,* strm_agen<2, float_vec>::get_adv(&input[2][0][0]));
+        float_vec temp = __vaddsp_vvv(red,green);
+        float_vec res2 = __vaddsp_vvv(temp,blue);
+        __vpred pred = strm_agen<3, float_vec>::get_vpred();
+        float_vec * addr = strm_agen<3, float_vec>::get_adv(&output[0][0]);
+        __vstore_pred(pred, addr, res2);
     }
-    __SE0_CLOSE();
+    __SA1_CLOSE();
+    __SA0_CLOSE();
+    __SE1_CLOSE();
     cout << "Output Dimensions: "<< height << " x " << width << endl;
     Mat gray_image(height, width, CV_32F, output);  
     gray_image.convertTo(gray_image, CV_8U);
