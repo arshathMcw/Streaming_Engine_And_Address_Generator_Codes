@@ -8,9 +8,9 @@ using namespace c7x;
 // __vaddw_vkv
 int main() {
     float intensity[3];
-    intensity[0] = 0.5;
+    intensity[0] = 0.1;
     intensity[1] = 0.1;
-    intensity[2] = 0.2;
+    intensity[2] = 0.5;
     // cout<<"Enter Brightness for Red : ";
     // cin>>red;
     // cout<<"Enter Brightness for Green : ";
@@ -24,7 +24,7 @@ int main() {
     }
     int height = image.rows,width = image.cols,channel = 3,iteration = 0;
     const int vec_len = element_count_of<float_vec>::value;
-    float input[channel][height][width],output[channel][height][width]; 
+    float input[channel][height][width],output[channel][height][width],output2[channel][height][width]; 
     cout << "Image Dimensions: " << channel << " x " << height << " x " << width << endl;
     for (int r = 0; r < height; r++) {
         for (int c = 0; c < width; c++) {
@@ -56,26 +56,28 @@ int main() {
 
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
     saTemplate.VECLEN    = sa_veclen<int_vec>::value;
-    saTemplate.DIMFMT = __SA_DIMFMT_2D;
+    saTemplate.DIMFMT = __SA_DIMFMT_3D;
     saTemplate.ICNT0 = width;
     saTemplate.ICNT1 = height; 
     saTemplate.DIM1 = width; 
     saTemplate.ICNT2 = channel;      
     saTemplate.DIM2 = (width * height);
-
-    float *rOut=&output[0][0][0];
     int times = (height * width) / vec_len;
-
     __SE1_OPEN((void *)&intensity[0], seTemplate2);
     __SE0_OPEN((void *)&input[0][0][0], seTemplate);
-
+    __SA0_OPEN(saTemplate);
     for(int ch = 0;ch < channel;ch++){
         float_vec color = strm_eng<1, float_vec>::get_adv();
-        for(int t = 0;t < times;t++,rOut+=vec_len,iteration++){
+        for(int t = 0;t < times;t++,iteration++){
             float_vec res1 = __vaddsp_vvv(color,strm_eng<0, float_vec>::get_adv());
-            *(float_vec *) (rOut) = res1;
+            __vpred pred = strm_agen<0, float_vec>::get_vpred();
+            float_vec * addr = strm_agen<0, float_vec>::get_adv(&output[0][0][0]);
+            __vstore_pred(pred, addr, res1);
         }
     }
+    __SE0_CLOSE();
+    __SE1_CLOSE();
+    __SA0_CLOSE();
     Mat image2(height, width, CV_32FC3);
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
