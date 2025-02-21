@@ -1,7 +1,7 @@
 /*
 We are going to use all the streaing engine and address generator
 se 1,2 sa 1 for loading the value from input
-sa 2,3,4 for soring it in output
+sa 2,3,4 for storing it in output
 */
 
 #include "opencv2/opencv.hpp"
