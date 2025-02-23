@@ -42,6 +42,13 @@ int main() {
             outIdx += vec_len;
         }
     }
+    cout<<"Sana";
+    for(int h = 0;h < height;h++){
+        for(int w = 0;w < width;w++){
+            cout<<output3[h][w]<<" ";
+        }
+        cout<<endl;
+    }
     Mat gray_image(height, width, CV_32F, output3);  
     gray_image.convertTo(gray_image, CV_8U);
     imwrite("blur.jpg", gray_image);
