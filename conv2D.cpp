@@ -12,19 +12,35 @@ int main(){
     int oheight = height - kheight + 1;
     int owidth = width - kwidth + 1;
     float input[height][width],kernel[kheight][kwidth],output[oheight][owidth];
+    int cnt = 0;
     for(int h = 0;h < height;h++){
         for(int w = 0;w < width;w++){
-            input[h][w] = h + w;
+            input[h][w] = cnt++;
         }
     }
+    cnt = 0;
     for(int h = 0;h < kheight;h++){
         for(int w = 0;w < kwidth;w++){
-            kernel[h][w] = h + w;
+            kernel[h][w] = cnt++;
         }
     }
+    // cout<<"Input : "<<endl;
+    // for(int h = 0;h < height;h++){
+    //     for(int w = 0;w < width;w++){
+    //         cout<<input[h][w]<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+    // cout<<"Kernel : "<<endl;
+    // for(int h = 0;h < kheight;h++){
+    //     for(int w = 0;w < kwidth;w++){
+    //         cout<<kernel[h][w]<<" ";
+    //     }
+    //     cout<<endl;
+    // }
     const int vec_len = element_count_of<float_vec>::value;
     float *pixel=&input[0][0];
-
+    int iterations = 0;
     for (int i = 0; i < oheight; i++) {
         float *outIdx = &output[i][0];
         for (int j = 0; j < owidth ; j += vec_len) { 
@@ -34,17 +50,29 @@ int main(){
                     pixel = &input[i + k][j + l];
                     float_vec pixels = *(float_vec *)pixel;
                     float_vec kernelVal = (float_vec)kernel[k][l]; 
+                    cout<<"Input : ";
+                    pixels.print();
+                    cout<<"Kernel : ";
+                    kernelVal.print();
                     sum = __vaddsp_vvv(sum, __vmpysp_vvv(pixels, kernelVal));
+                    iterations++;
+                    cout<<"Temporary Sum : ";
+                    sum.print();
                 }
             }
+            cout<<"Sum : ";
+            sum.print();
+            cout<<"--------------------------------"<<endl;
             *(float_vec *) (outIdx) = sum;
             outIdx += vec_len;
         }
     }
-    for(int h = 0;h < oheight;h++){
-        for(int w = 0;w < owidth;w++){
-            cout<<output[h][w]<<" ";
-        }
-        cout<<endl;
-    }
+    // cout<<"Iterations : "<<iterations<<endl;
+    // cout<<"Output : "<<endl;
+    // for(int h = 0;h < oheight;h++){
+    //     for(int w = 0;w < owidth;w++){
+    //         cout<<output[h][w]<<" ";
+    //     }
+    //     cout<<endl;
+    // }
 }

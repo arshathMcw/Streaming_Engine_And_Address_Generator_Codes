@@ -22,19 +22,21 @@ int main() {
             output[r][c] = (float)image.at<uchar>(r, c); 
         }
     }
+    int oheight = height - 2;
+    int owidth = width - 2;
     float output3[height][width];
     float kernel[3][3] = {{1/16.0,2/16.0,1/16.0},{2/16.0,4/16.0,2/16.0},{1/16.0,2/16.0,1/16.0}};
     float *pixel=&output[0][0];
-
-    for (int i = 1; i < height - 1; i++) {
+    
+    for (int i = 0; i < oheight; i++) {
         float *outIdx = &output3[i][0];
-        for (int j = 1; j < width; j += vec_len) { 
+        for (int j = 0; j < owidth; j += vec_len) { 
             float_vec sum = float_vec(0);
-            for (int k = -1; k <= 1; k++) {
-                for (int l = -1; l <= 1; l++) {
+            for (int k = 0; k <= 2; k++) {
+                for (int l = 0; l <= 2; l++) {
                     pixel = &output[i + k][j + l];
                     float_vec pixels = *(float_vec *)pixel;
-                    float_vec kernelVal = (float_vec)(kernel[k + 1][l + 1]); 
+                    float_vec kernelVal = (float_vec)(kernel[k][l]); 
                     sum = __vaddsp_vvv(sum, __vmpysp_vvv(pixels, kernelVal));
                 }
             }
@@ -42,9 +44,8 @@ int main() {
             outIdx += vec_len;
         }
     }
-    cout<<"Sana";
-    for(int h = 0;h < height;h++){
-        for(int w = 0;w < width;w++){
+    for(int h = 0;h < oheight;h++){
+        for(int w = 0;w < owidth;w++){
             cout<<output3[h][w]<<" ";
         }
         cout<<endl;
