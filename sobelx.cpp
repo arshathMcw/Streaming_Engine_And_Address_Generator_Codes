@@ -8,7 +8,7 @@ using namespace cv;
 using namespace c7x;
 
 int main() {
-    Mat image = imread("blur.jpg", IMREAD_GRAYSCALE); 
+    Mat image = imread("Bikesgray.jpg", IMREAD_GRAYSCALE); 
     if (image.empty()) {
         cout << "Could not open or find the image!" << endl;
         return -1;

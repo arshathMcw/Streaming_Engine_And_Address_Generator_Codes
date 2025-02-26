@@ -87,20 +87,16 @@ int main(){
                 mat2Idx = &mat2[cc+1][c];
                 __SE0_OPEN((void *)&mat2[cc+1][c], seTemplate);
             }
-            // vOutC.print();
             __vpred pred = strm_agen<0, int_vec>::get_vpred();
             int_vec * addr = strm_agen<0, int_vec>::get_adv(&res2[0][0]);
             __vstore_pred(pred, addr, vOutC);
-            // *(int_vec *) (res2Idx) = vOutC;
-            // res2Idx += vec_len;
         }
-        // __SA0_CLOSE();
-        for(int x = start;x < col2;x++){
-            for(int k = 0;k < col1;k++){
-                res2[r][x] += mat1[r][k] * mat2[k][x];  
-                iteration2++;
-            }
-        }
+        // for(int x = start;x < col2;x++){
+        //     for(int k = 0;k < col1;k++){
+        //         res2[r][x] += mat1[r][k] * mat2[k][x];  
+        //         iteration2++;
+        //     }
+        // }
     }
     for(int r = 0;r < row1;r++){
         for(int c = 0;c < col2;c++){
