@@ -68,12 +68,12 @@ int main(){
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
     saTemplate.VECLEN    = sa_veclen<int_vec>::value;
     saTemplate.DIMFMT = __SA_DIMFMT_2D;
-    saTemplate.ICNT0 = col2 - (col2 % 16);
+    saTemplate.ICNT0 = col2 ;
     saTemplate.ICNT1 = row1; 
     saTemplate.DIM1 = col2;   
     __SA0_OPEN(saTemplate);
     for(int r = 0;r < row1;r++){
-        for(int c = 0;c+vec_len <= col2;c+=vec_len){
+        for(int c = 0;c < col2;c+=vec_len){
             int_vec vOutC = (int_vec)(0);
             __SE0_OPEN((void *)&mat2[0][c], seTemplate);
             __SE1_OPEN((void *)&mat1[r][0], seTemplate2);
@@ -88,17 +88,12 @@ int main(){
             int_vec * addr = strm_agen<0, int_vec>::get_adv(&res2[0][0]);
             __vstore_pred(pred, addr, vOutC);
         }
-        for(int x = start;x < col2;x++){
-            for(int k = 0;k < col1;k++){
-                res2[r][x] += mat1[r][k] * mat2[k][x];  
-                iteration2++;
-            }
-        }
     }
     for(int r = 0;r < row1;r++){
         for(int c = 0;c < col2;c++){
             if(res[r][c] != res2[r][c]){
                 cout<<"They are not Equal :("<<endl;
+                return 0;
             }
         }
     }
