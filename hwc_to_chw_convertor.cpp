@@ -3,7 +3,7 @@
 #include <c7x_scalable.h>
 
 using namespace std;
-using namespace cv;
+
 using namespace c7x;
 
 using namespace std;
@@ -18,7 +18,6 @@ int main(){
             }
         }
     }
-
     __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
     seTemplate.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate.VECLEN    = se_veclen<int_vec>::value;
@@ -32,7 +31,6 @@ int main(){
     seTemplate.DIM2 = (channel * vec_len);
     seTemplate.ICNT3 = height;               
     seTemplate.DIM3 = width * channel * vec_len;
-
      __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
     saTemplate.VECLEN    = sa_veclen<int_vec>::value;
     saTemplate.DIMFMT = __SA_DIMFMT_2D;
@@ -45,16 +43,17 @@ int main(){
     __SE0_OPEN((void *)&arr[0][0][0], seTemplate);
     int rem = width%vec_len;
     int32_t ctr = 0;
+
     for(int idx = 0;idx < height * (width / vec_len);idx++){
         __vpred pred = strm_agen<0, int_vec>::get_vpred();
         int_vec * addr = strm_agen<0, int_vec>::get_adv(&result[0][0][0]);
         __vstore_pred(pred, addr, strm_eng<0, int_vec>::get_adv());
 
-         __vpred pred2 = strm_agen<1, int_vec>::get_vpred();
+        __vpred pred2 = strm_agen<1, int_vec>::get_vpred();
         int_vec * addr2 = strm_agen<1, int_vec>::get_adv(&result[1][0][0]);
         __vstore_pred(pred2, addr2, strm_eng<0, int_vec>::get_adv());
 
-         __vpred pred3 = strm_agen<2, int_vec>::get_vpred();
+        __vpred pred3 = strm_agen<2, int_vec>::get_vpred();
         int_vec * addr3 = strm_agen<2, int_vec>::get_adv(&result[2][0][0]);
         __vstore_pred(pred3, addr3, strm_eng<0, int_vec>::get_adv());
     }

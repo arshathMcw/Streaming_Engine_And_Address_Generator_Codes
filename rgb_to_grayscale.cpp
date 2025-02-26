@@ -17,7 +17,7 @@ using namespace cv;
 using namespace c7x;
 int main() {
     cout<<"RGB To Gray Scale Conversion using Intrinsics"<<endl;
-    Mat image = imread("image2.jpg");
+    Mat image = imread("dhoni.jpeg");
     if (image.empty()) {
         cout << "Could not open or find the image!" << endl;
         return -1;
@@ -46,8 +46,8 @@ int main() {
     saTemplate.DIM1 = width;  
     
     float_vec constR = float_vec(0.299f);
-    float_vec constG = float_vec(0.299f);
-    float_vec constB = float_vec(0.299f);
+    float_vec constG = float_vec(0.587f);
+    float_vec constB = float_vec(0.144f);
     int iteration = 0;
     int times = (height * width) / vec_len;
     __SA0_OPEN(saTemplate);
@@ -67,13 +67,20 @@ int main() {
     }
     __SA1_CLOSE();
     __SA0_CLOSE();
-    __SE1_CLOSE();
+    __SA2_CLOSE();
+    __SA3_CLOSE();
     cout << "Output Dimensions: "<< height << " x " << width << endl;
     Mat gray_image(height, width, CV_32F, output);  
     gray_image.convertTo(gray_image, CV_8U);
-    imwrite("output.jpg", gray_image);
+    imwrite("gray_image.jpg", gray_image);
     cout<<"Iteration : "<<iteration<<endl;
     cout<<(3*height*width)/iteration<<" times better"<<endl;
+    // for (int i = 0; i < gray_image.rows; i++) {
+    //     for (int j = 0; j < gray_image.cols; j++) {
+    //         cout << (int)gray_image.at<uchar>(i, j) << " ";  // Cast to int for proper display
+    //     }
+    //     cout << endl;
+    // }
 }
 
 // http://www.codebind.com/cpp-tutorial/install-opencv-ubuntu-cpp/
