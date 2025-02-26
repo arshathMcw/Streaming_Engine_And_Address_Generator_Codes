@@ -22,7 +22,7 @@ int main(){
         cout<<"This is not a valid matrix to do multiplication";
         return 0;
     }
-    int32_t mat1[row1][col1],mat2[row2][col2],res[row1][col2],res2[row1][col2] ,*mat1Idx=&mat1[0][0],*mat2Idx=&mat2[0][0],*res2Idx=&res2[0][0];
+    int32_t mat1[row1][col1],mat2[row2][col2],res[row1][col2],res2[row1][col2];
     for(int r = 0;r < row1;r++){
         for(int c =0;c < col1;c++){
             mat1[r][c] =  r+c;
@@ -73,8 +73,6 @@ int main(){
     saTemplate.DIM1 = col2;   
     __SA0_OPEN(saTemplate);
     for(int r = 0;r < row1;r++){
-        mat2Idx = &mat2[0][0];
-        res2Idx = &res2[r][0];
         for(int c = 0;c+vec_len <= col2;c+=vec_len){
             int_vec vOutC = (int_vec)(0);
             __SE0_OPEN((void *)&mat2[0][c], seTemplate);
@@ -84,7 +82,6 @@ int main(){
                 int_vec resw = __vmpyww_vvv(strm_eng<0, int_vec>::get_adv(),strm_eng<1, int_vec>::get_adv());
                 vOutC = __vaddw_vvv(vOutC,resw);
                 iteration2++;
-                mat2Idx = &mat2[cc+1][c];
                 __SE0_OPEN((void *)&mat2[cc+1][c], seTemplate);
             }
             __vpred pred = strm_agen<0, int_vec>::get_vpred();
