@@ -47,9 +47,6 @@ int main(){
             }
         }
     }
-    int rem = col2 % vec_len;
-    int start = col2 - rem;
-    cout<<"Start : "<<start<<endl;
     // Add Streaming Engine
     __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
     seTemplate.ELETYPE   = se_eletype<int_vec>::value;
@@ -59,10 +56,8 @@ int main(){
     __SE_TEMPLATE_v1 seTemplate2 = __gen_SE_TEMPLATE_v1();
     seTemplate2.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate2.VECLEN    = se_veclen<int_vec>::value;
-    seTemplate2.DIMFMT = __SE_DIMFMT_2D;
+    seTemplate2.DIMFMT = __SE_DIMFMT_1D;
     seTemplate2.ICNT0 = col1;
-    seTemplate2.ICNT1 = row1;                 
-    seTemplate2.DIM1 = col1;
     seTemplate2.ELEDUP    = __SE_ELEDUP_16X;
     // For Address Generator
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
@@ -102,5 +97,5 @@ int main(){
     __SE1_CLOSE();
     cout<<"Iteration 1 : "<<iteration1<<endl;
     cout<<"Iteration 2 : "<<iteration2<<endl;
-    cout<<"Intrinsics Code is "<<(iteration1/iteration2)<<" times better than Scalar Code"<<endl;
+    cout<<"My Code is "<<(iteration1/iteration2)<<" times better than Scalar Code"<<endl;
 }
