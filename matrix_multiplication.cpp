@@ -9,15 +9,15 @@ cd scripts
 using namespace std;
 using namespace c7x;
 int main(){
-    int row1,col1,row2,col2,vec_len = element_count_of<int_vec>::value,iteration1, iteration2;
-    cout<<"Enter the Row Size for Matrix 1 : ";
-    cin>>row1;
-    cout<<"Enter the Column Size for Matrix 1 : ";
-    cin>>col1;
-    cout<<"Enter the Row Size for Matrix 2 : ";
-    cin>>row2;
-    cout<<"Enter the Column Size for Matrix 2 : ";
-    cin>>col2;
+    int row1 = 500,col1 = 500 ,row2 = 500,col2 = 500,vec_len = element_count_of<int_vec>::value,iteration1, iteration2;
+    // cout<<"Enter the Row Size for Matrix 1 : ";
+    // cin>>row1;
+    // cout<<"Enter the Column Size for Matrix 1 : ";
+    // cin>>col1;
+    // cout<<"Enter the Row Size for Matrix 2 : ";
+    // cin>>row2;
+    // cout<<"Enter the Column Size for Matrix 2 : ";
+    // cin>>col2;
     if(row2 != col1){
         cout<<"This is not a valid matrix to do multiplication";
         return 0;
@@ -51,8 +51,10 @@ int main(){
     __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
     seTemplate.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate.VECLEN    = se_veclen<int_vec>::value;
-    seTemplate.DIMFMT = __SE_DIMFMT_1D;
-    seTemplate.ICNT0 = col2;
+    seTemplate.DIMFMT = __SE_DIMFMT_2D;
+    seTemplate.ICNT0 = 16;
+    seTemplate.ICNT1 = row2; 
+    seTemplate.DIM1 = col2;
     __SE_TEMPLATE_v1 seTemplate2 = __gen_SE_TEMPLATE_v1();
     seTemplate2.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate2.VECLEN    = se_veclen<int_vec>::value;
@@ -74,10 +76,14 @@ int main(){
             __SE1_OPEN((void *)&mat1[r][0], seTemplate2);
             int times = 0;
             for(int cc = 0;cc < col1;cc+=1){
-                int_vec resw = __vmpyww_vvv(strm_eng<0, int_vec>::get_adv(),strm_eng<1, int_vec>::get_adv());
+                int_vec one = strm_eng<0, int_vec>::get_adv();
+                int_vec two = strm_eng<1, int_vec>::get_adv();
+                // one.print();
+                // two.print();
+                // cout<<"--------------------"<<endl;
+                int_vec resw = __vmpyww_vvv(one,two);
                 vOutC = __vaddw_vvv(vOutC,resw);
                 iteration2++;
-                __SE0_OPEN((void *)&mat2[cc+1][c], seTemplate);
             }
             __vpred pred = strm_agen<0, int_vec>::get_vpred();
             int_vec * addr = strm_agen<0, int_vec>::get_adv(&res2[0][0]);
