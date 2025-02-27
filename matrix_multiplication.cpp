@@ -25,7 +25,7 @@ int main(){
     int32_t mat1[row1][col1],mat2[row2][col2],res[row1][col2],res2[row1][col2];
     for(int r = 0;r < row1;r++){
         for(int c =0;c < col1;c++){
-            mat1[r][c] =  r+c;
+            mat1[r][c] =  20+r+c;
         }
     }
     for(int r = 0;r < row2;r++){
@@ -52,15 +52,23 @@ int main(){
     seTemplate.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate.VECLEN    = se_veclen<int_vec>::value;
     seTemplate.DIMFMT = __SE_DIMFMT_2D;
-    seTemplate.ICNT0 = 16;
+    seTemplate.ICNT0 = vec_len;
     seTemplate.ICNT1 = row2; 
     seTemplate.DIM1 = col2;
+
+
     __SE_TEMPLATE_v1 seTemplate2 = __gen_SE_TEMPLATE_v1();
     seTemplate2.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate2.VECLEN    = se_veclen<int_vec>::value;
-    seTemplate2.DIMFMT = __SE_DIMFMT_1D;
+    seTemplate2.DIMFMT = __SE_DIMFMT_3D;
     seTemplate2.ICNT0 = col1;
+    seTemplate2.ICNT1 = ceil(col2 / (float) vec_len); 
+    seTemplate2.DIM1 = 0;
+    seTemplate2.ICNT2 = row1; 
+    seTemplate2.DIM2 = col1;
     seTemplate2.ELEDUP    = __SE_ELEDUP_16X;
+
+
     // For Address Generator
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
     saTemplate.VECLEN    = sa_veclen<int_vec>::value;
@@ -69,22 +77,21 @@ int main(){
     saTemplate.ICNT1 = row1; 
     saTemplate.DIM1 = col2;   
     __SA0_OPEN(saTemplate);
+    __SE1_OPEN((void *)&mat1[0][0], seTemplate2);
     for(int r = 0;r < row1;r++){
         for(int c = 0;c < col2;c+=vec_len){
             int_vec vOutC = (int_vec)(0);
             __SE0_OPEN((void *)&mat2[0][c], seTemplate);
-            __SE1_OPEN((void *)&mat1[r][0], seTemplate2);
             int times = 0;
             for(int cc = 0;cc < col1;cc+=1){
                 int_vec one = strm_eng<0, int_vec>::get_adv();
                 int_vec two = strm_eng<1, int_vec>::get_adv();
-                // one.print();
                 // two.print();
-                // cout<<"--------------------"<<endl;
                 int_vec resw = __vmpyww_vvv(one,two);
                 vOutC = __vaddw_vvv(vOutC,resw);
                 iteration2++;
             }
+            // cout<<"============================="<<endl;
             __vpred pred = strm_agen<0, int_vec>::get_vpred();
             int_vec * addr = strm_agen<0, int_vec>::get_adv(&res2[0][0]);
             __vstore_pred(pred, addr, vOutC);
@@ -96,7 +103,9 @@ int main(){
                 cout<<"They are not Equal :("<<endl;
                 return 0;
             }
+            // cout<<res[r][c]<<"="<<res2[r][c]<<" ";
         }
+        // cout<<endl;
     }
     __SA0_CLOSE();
     __SE0_CLOSE();
