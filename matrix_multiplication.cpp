@@ -9,7 +9,7 @@ cd scripts
 using namespace std;
 using namespace c7x;
 int main(){
-    int row1 = 500,col1 = 500 ,row2 = 500,col2 = 500,vec_len = element_count_of<int_vec>::value,iteration1, iteration2;
+    int row1 = 32,col1 = 64 ,row2 = 64,col2 = 64,vec_len = element_count_of<int_vec>::value,iteration1, iteration2;
     // cout<<"Enter the Row Size for Matrix 1 : ";
     // cin>>row1;
     // cout<<"Enter the Column Size for Matrix 1 : ";
@@ -23,15 +23,19 @@ int main(){
         return 0;
     }
     int32_t mat1[row1][col1],mat2[row2][col2],res[row1][col2],res2[row1][col2];
+    int cnt = 0;
     for(int r = 0;r < row1;r++){
         for(int c =0;c < col1;c++){
-            mat1[r][c] =  20+r+c;
+            mat1[r][c] =  cnt++;
         }
     }
+    cnt = 0;
     for(int r = 0;r < row2;r++){
         for(int c =0;c < col2;c++){
-            mat2[r][c] =  r+c;
+            mat2[r][c] =  cnt++;
+            cout<<mat2[r][c]<<" ";
         }
+        cout<<endl;
     }
     for(int r = 0;r < row1;r++){
         for(int c = 0;c < col2;c++){
@@ -48,15 +52,8 @@ int main(){
         }
     }
     // Add Streaming Engine
-    __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
-    seTemplate.ELETYPE   = se_eletype<int_vec>::value;
-    seTemplate.VECLEN    = se_veclen<int_vec>::value;
-    seTemplate.DIMFMT = __SE_DIMFMT_2D;
-    seTemplate.ICNT0 = vec_len;
-    seTemplate.ICNT1 = row2; 
-    seTemplate.DIM1 = col2;
-
-
+    
+    
     __SE_TEMPLATE_v1 seTemplate2 = __gen_SE_TEMPLATE_v1();
     seTemplate2.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate2.VECLEN    = se_veclen<int_vec>::value;
@@ -67,8 +64,8 @@ int main(){
     seTemplate2.ICNT2 = row1; 
     seTemplate2.DIM2 = col1;
     seTemplate2.ELEDUP    = __SE_ELEDUP_16X;
-
-
+    
+    
     // For Address Generator
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
     saTemplate.VECLEN    = sa_veclen<int_vec>::value;
@@ -76,22 +73,56 @@ int main(){
     saTemplate.ICNT0 = col2 ;
     saTemplate.ICNT1 = row1; 
     saTemplate.DIM1 = col2;   
+
+    // Need to edit this
+    __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
+    seTemplate.ELETYPE   = se_eletype<int_vec>::value;
+    seTemplate.VECLEN    = se_veclen<int_vec>::value;
+    seTemplate.DIMFMT = __SE_DIMFMT_4D;
+    seTemplate.ICNT0 = vec_len;
+    seTemplate.ICNT1 = row2; 
+    seTemplate.DIM1 = col2;
+    // seTemplate2.ICNT1 = ceil(col2 / (float) vec_len); 
+    // seTemplate2.DIM1 = 0;
+    seTemplate.ICNT2 = ceil(col2 / (float) vec_len); ; 
+    seTemplate.DIM2 = 16;
+    // seTemplate.ICNT3 = ceil(col2 / (float) vec_len);  
+    seTemplate.ICNT3 = row2;  
+    // seTemplate.ICNT3 = 4;
+    seTemplate.DIM3 = 0;
+    
+    
+    
+    //  __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
+    // seTemplate.ELETYPE   = se_eletype<int_vec>::value;
+    // seTemplate.VECLEN    = se_veclen<int_vec>::value;
+    // seTemplate.DIMFMT = __SE_DIMFMT_3D;
+    // seTemplate.ICNT0 = vec_len;
+    // seTemplate.ICNT1 = row1; 
+    // seTemplate.DIM1 = col1;
+    // // seTemplate2.ICNT1 = ceil(col2 / (float) vec_len); 
+    // // seTemplate2.DIM1 = 0;
+    // seTemplate.ICNT2 = row2; 
+    // seTemplate.DIM2 = 0;
+    
+    
     __SA0_OPEN(saTemplate);
     __SE1_OPEN((void *)&mat1[0][0], seTemplate2);
+    
+    __SE0_OPEN((void *)&mat2[0][0], seTemplate);
     for(int r = 0;r < row1;r++){
         for(int c = 0;c < col2;c+=vec_len){
             int_vec vOutC = (int_vec)(0);
-            __SE0_OPEN((void *)&mat2[0][c], seTemplate);
             int times = 0;
             for(int cc = 0;cc < col1;cc+=1){
                 int_vec one = strm_eng<0, int_vec>::get_adv();
                 int_vec two = strm_eng<1, int_vec>::get_adv();
-                // two.print();
+                one.print();
                 int_vec resw = __vmpyww_vvv(one,two);
                 vOutC = __vaddw_vvv(vOutC,resw);
                 iteration2++;
             }
-            // cout<<"============================="<<endl;
+            cout<<"============================="<<endl;
             __vpred pred = strm_agen<0, int_vec>::get_vpred();
             int_vec * addr = strm_agen<0, int_vec>::get_adv(&res2[0][0]);
             __vstore_pred(pred, addr, vOutC);
