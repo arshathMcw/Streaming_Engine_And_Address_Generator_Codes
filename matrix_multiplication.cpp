@@ -9,15 +9,15 @@ cd scripts
 using namespace std;
 using namespace c7x;
 int main(){
-    int row1 = 32,col1 = 64 ,row2 = 64,col2 = 64,vec_len = element_count_of<int_vec>::value,iteration1, iteration2;
-    // cout<<"Enter the Row Size for Matrix 1 : ";
-    // cin>>row1;
-    // cout<<"Enter the Column Size for Matrix 1 : ";
-    // cin>>col1;
-    // cout<<"Enter the Row Size for Matrix 2 : ";
-    // cin>>row2;
-    // cout<<"Enter the Column Size for Matrix 2 : ";
-    // cin>>col2;
+    int row1 ,col1 ,row2,col2 ,vec_len = element_count_of<int_vec>::value,iteration1, iteration2;
+    cout<<"Enter the Row Size for Matrix 1 : ";
+    cin>>row1;
+    cout<<"Enter the Column Size for Matrix 1 : ";
+    cin>>col1;
+    cout<<"Enter the Row Size for Matrix 2 : ";
+    cin>>row2;
+    cout<<"Enter the Column Size for Matrix 2 : ";
+    cin>>col2;
     if(row2 != col1){
         cout<<"This is not a valid matrix to do multiplication";
         return 0;
@@ -33,9 +33,7 @@ int main(){
     for(int r = 0;r < row2;r++){
         for(int c =0;c < col2;c++){
             mat2[r][c] =  cnt++;
-            cout<<mat2[r][c]<<" ";
         }
-        cout<<endl;
     }
     for(int r = 0;r < row1;r++){
         for(int c = 0;c < col2;c++){
@@ -75,6 +73,8 @@ int main(){
     saTemplate.DIM1 = col2;   
 
     // Need to edit this
+
+
     __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
     seTemplate.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate.VECLEN    = se_veclen<int_vec>::value;
@@ -82,34 +82,15 @@ int main(){
     seTemplate.ICNT0 = vec_len;
     seTemplate.ICNT1 = row2; 
     seTemplate.DIM1 = col2;
-    // seTemplate2.ICNT1 = ceil(col2 / (float) vec_len); 
-    // seTemplate2.DIM1 = 0;
     seTemplate.ICNT2 = ceil(col2 / (float) vec_len); ; 
     seTemplate.DIM2 = 16;
-    // seTemplate.ICNT3 = ceil(col2 / (float) vec_len);  
-    seTemplate.ICNT3 = row2;  
-    // seTemplate.ICNT3 = 4;
+    seTemplate.ICNT3 = row1;  
     seTemplate.DIM3 = 0;
     
     
-    
-    //  __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
-    // seTemplate.ELETYPE   = se_eletype<int_vec>::value;
-    // seTemplate.VECLEN    = se_veclen<int_vec>::value;
-    // seTemplate.DIMFMT = __SE_DIMFMT_3D;
-    // seTemplate.ICNT0 = vec_len;
-    // seTemplate.ICNT1 = row1; 
-    // seTemplate.DIM1 = col1;
-    // // seTemplate2.ICNT1 = ceil(col2 / (float) vec_len); 
-    // // seTemplate2.DIM1 = 0;
-    // seTemplate.ICNT2 = row2; 
-    // seTemplate.DIM2 = 0;
-    
-    
     __SA0_OPEN(saTemplate);
-    __SE1_OPEN((void *)&mat1[0][0], seTemplate2);
-    
     __SE0_OPEN((void *)&mat2[0][0], seTemplate);
+    __SE1_OPEN((void *)&mat1[0][0], seTemplate2);
     for(int r = 0;r < row1;r++){
         for(int c = 0;c < col2;c+=vec_len){
             int_vec vOutC = (int_vec)(0);
@@ -117,12 +98,10 @@ int main(){
             for(int cc = 0;cc < col1;cc+=1){
                 int_vec one = strm_eng<0, int_vec>::get_adv();
                 int_vec two = strm_eng<1, int_vec>::get_adv();
-                one.print();
                 int_vec resw = __vmpyww_vvv(one,two);
                 vOutC = __vaddw_vvv(vOutC,resw);
                 iteration2++;
             }
-            cout<<"============================="<<endl;
             __vpred pred = strm_agen<0, int_vec>::get_vpred();
             int_vec * addr = strm_agen<0, int_vec>::get_adv(&res2[0][0]);
             __vstore_pred(pred, addr, vOutC);
@@ -134,9 +113,7 @@ int main(){
                 cout<<"They are not Equal :("<<endl;
                 return 0;
             }
-            // cout<<res[r][c]<<"="<<res2[r][c]<<" ";
         }
-        // cout<<endl;
     }
     __SA0_CLOSE();
     __SE0_CLOSE();
