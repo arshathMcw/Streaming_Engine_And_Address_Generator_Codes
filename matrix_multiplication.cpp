@@ -49,8 +49,7 @@ int main(){
             }
         }
     }
-    // Add Streaming Engine
-    
+    // Add Streaming Engine configuration
     
     __SE_TEMPLATE_v1 seTemplate2 = __gen_SE_TEMPLATE_v1();
     seTemplate2.ELETYPE   = se_eletype<int_vec>::value;
@@ -63,18 +62,6 @@ int main(){
     seTemplate2.DIM2 = col1;
     seTemplate2.ELEDUP    = __SE_ELEDUP_16X;
     
-    
-    // For Address Generator
-    __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
-    saTemplate.VECLEN    = sa_veclen<int_vec>::value;
-    saTemplate.DIMFMT = __SA_DIMFMT_2D;
-    saTemplate.ICNT0 = col2 ;
-    saTemplate.ICNT1 = row1; 
-    saTemplate.DIM1 = col2;   
-
-    // Need to edit this
-
-
     __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
     seTemplate.ELETYPE   = se_eletype<int_vec>::value;
     seTemplate.VECLEN    = se_veclen<int_vec>::value;
@@ -86,8 +73,15 @@ int main(){
     seTemplate.DIM2 = 16;
     seTemplate.ICNT3 = row1;  
     seTemplate.DIM3 = 0;
-    
-    
+
+    // For Address Generator configuration
+    __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
+    saTemplate.VECLEN    = sa_veclen<int_vec>::value;
+    saTemplate.DIMFMT = __SA_DIMFMT_2D;
+    saTemplate.ICNT0 = col2 ;
+    saTemplate.ICNT1 = row1; 
+    saTemplate.DIM1 = col2;   
+
     __SA0_OPEN(saTemplate);
     __SE0_OPEN((void *)&mat2[0][0], seTemplate);
     __SE1_OPEN((void *)&mat1[0][0], seTemplate2);
@@ -96,9 +90,7 @@ int main(){
             int_vec vOutC = (int_vec)(0);
             int times = 0;
             for(int cc = 0;cc < col1;cc+=1){
-                int_vec one = strm_eng<0, int_vec>::get_adv();
-                int_vec two = strm_eng<1, int_vec>::get_adv();
-                int_vec resw = __vmpyww_vvv(one,two);
+                int_vec resw = __vmpyww_vvv(strm_eng<0, int_vec>::get_adv(),strm_eng<1, int_vec>::get_adv());
                 vOutC = __vaddw_vvv(vOutC,resw);
                 iteration2++;
             }
