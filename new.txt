@@ -1,0 +1,34 @@
+for(int ch = 0; ch < out_channel; ch++){
+    for (int i = 0; i < output_height; i++) {
+        int *outIdx = &output[ch][i][0];
+
+        for (int j = 0; j < output_width ; j += vec_len) { 
+            int_vec sum = int_vec(0);
+
+            for(int x = 0; x < in_channel; x++){
+                for (int k = 0; k < kernel_height; k++) {
+                    for (int l = 0; l < kernel_width; l++) {
+                        int temp_pixels[vec_len];  // Temporary array to store stride-corrected values
+
+                        // Manually extract pixels at correct stride intervals
+                        for(int v = 0; v < vec_len; v++) {
+                            int col_index = (j + v) * stridey + l;  // Correct stride in width
+                            if(col_index < input_width) {  // Avoid out-of-bounds access
+                                temp_pixels[v] = input[x][(i * stridex) + k][col_index];
+                            } else {
+                                temp_pixels[v] = 0;  // Zero-padding if out of bounds
+                            }
+                        }
+
+                        int_vec pixels = *(int_vec*)temp_pixels;  // Load properly strided values
+                        int_vec kernelVal = (int_vec)kernel[ch][x][k][l]; 
+                        sum = __vaddw_vvv(sum, __vmpyww_vvv(pixels, kernelVal));
+                        iteration2++;
+                    }
+                }
+            }
+            *(int_vec *) (outIdx) = sum;
+            outIdx += vec_len;
+        }
+    }
+}
