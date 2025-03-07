@@ -1,12 +1,16 @@
 #include <iostream>
 #include <c7x.h>
 #include <c7x_scalable.h>
+#include <sys/time.h>
+ 
+#define CPU_FREQ 2e9
 
 using namespace std;
 using namespace c7x;
 
 int main(){
-    int in_channel=2 ,out_channel=2, input_height = 16 , input_width = 16 , kernel_height = 3  , kernel_width = 3;
+    struct timeval start, stop;
+    int in_channel=1 ,out_channel=1, input_height = 16 , input_width = 16 , kernel_height = 3  , kernel_width = 3;
     int stridex = 1,stridey = 1;
     int padding  = 1;
     int output_height = ((input_height + (2 * padding) - kernel_height) / stridex) + 1;
@@ -14,6 +18,14 @@ int main(){
     int inputwop[in_channel][input_height][input_width],kernel[out_channel][in_channel][kernel_height][kernel_width];
     int output2[out_channel][output_height][output_width],output[out_channel][output_height][output_width];
     int cnt = 0;
+    for(int ch = 0;ch < out_channel;ch++){
+        for(int h = 0;h < output_height;h++){
+            for(int w = 0;w < output_width;w++){
+                output2[ch][h][w] = 0;
+                output[ch][h][w] = 0;
+            }
+        }
+    }
     for(int ch = 0;ch < in_channel;ch++){
         for(int h = 0;h < input_height;h++){
             for(int w = 0;w < input_width;w++){
@@ -37,10 +49,27 @@ int main(){
     for(int ch = 0;ch < in_channel;ch++){
         for(int h = 0;h < input_height;h++){
             for(int w = 0;w < input_width;w++){
+                input[ch][h][w] = 0;
+            }
+        }
+    }
+    for(int ch = 0;ch < in_channel;ch++){
+        for(int h = 0;h < input_height;h++){
+            for(int w = 0;w < input_width;w++){
                 input[ch][h+padding][w+padding] = inputwop[ch][h][w];
             }
         }
     }
+
+    // for(int ch = 0;ch < in_channel;ch++){
+    //     for(int h = 0;h < input_height;h++){
+    //         for(int w = 0;w < input_width;w++){
+    //             cout<<input[ch][h][w]<<" ";
+    //         }
+    //         cout<<endl;
+    //     }
+    //     cout<<endl;
+    // }
     
 
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
@@ -51,7 +80,7 @@ int main(){
     saTemplate.DIM1 = output_width;   
     saTemplate.ICNT2 =out_channel; 
     saTemplate.DIM2 = output_height * output_width;
-    
+    gettimeofday(&start, NULL);
     const int vec_len = element_count_of<int_vec>::value;
     int *pixel=&input[0][0][0];
     int iteration2 = 0;
@@ -89,13 +118,20 @@ int main(){
                 for(int cch = 0;cch < in_channel;cch++){
                     for(int rr = 0; rr < kernel_height; rr++) {
                         for(int cc = 0; cc < kernel_width; cc++) {
-                            res += (input[cch][(r*stridex)+rr][(c*stridey)+cc] * kernel[ch][cch][rr][cc]);
+                            int input_r = r * stridex + rr;
+                            int input_c = c * stridey + cc;
+                            // res += (input[cch][(r*stridex)+rr][(c*stridey)+cc] * kernel[ch][cch][rr][cc]);
+                            if (input_r < input_height && input_c < input_width) {
+                                res += (input[cch][input_r][input_c] * kernel[ch][cch][rr][cc]);
+                            }
+
                             iteration1++;
                         }
                     }
                 }
                 output2[ch][r][c] = res;
             }
+            
         }
     }
     
@@ -109,15 +145,15 @@ int main(){
         cout<<endl;
     }
     
-    // for(int ch = 0;ch < out_channel;ch++){
-    //     for(int h = 0;h < output_height;h++){
-    //         for(int w = 0;w < output_width;w++){
-    //             cout<<output2[ch][h][w]<<" ";
-    //         }
-    //         cout<<endl;
-    //     }
-    //     cout<<endl;
-    // }
+    for(int ch = 0;ch < out_channel;ch++){
+        for(int h = 0;h < output_height;h++){
+            for(int w = 0;w < output_width;w++){
+                cout<<output2[ch][h][w]<<" ";
+            }
+            cout<<endl;
+        }
+        cout<<endl;
+    }
 
     for(int ch = 0;ch < out_channel;ch++){
         for(int h = 0;h < output_height;h++){
@@ -129,7 +165,7 @@ int main(){
             }
         }
     }
-    cout<<iteration1<<" "<<iteration2<<" "<<iteration1/iteration2<<endl;
+    // cout<<iteration1<<" "<<iteration2<<" "<<iteration1/iteration2<<endl;
 }
 
 

@@ -5,7 +5,14 @@
     "iostream": "cpp",
     "ostream": "cpp",
     "chrono": "cpp",
-    "cmath": "cpp"
+    "cmath": "cpp",
+    "ratio": "cpp",
+    "system_error": "cpp",
+    "array": "cpp",
+    "functional": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",

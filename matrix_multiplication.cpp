@@ -8,12 +8,13 @@ cd scripts
 #include <c7x_scalable.h>
 using namespace std;
 using namespace c7x;
-
-#include <cstdlib> 
-#include <ctime>
-#include<chrono>
+#include <sys/time.h>
+ 
+#define CPU_FREQ 2e9
 
 int main(){
+    struct timeval start, stop;
+    // TI_profile_start(TI_PROFILE_KERNEL_INIT);    
     int row1 ,col1 ,row2,col2 ,vec_len = element_count_of<int_vec>::value,iteration1, iteration2;
     cout<<"Enter the Row Size for Matrix 1 : ";
     cin>>row1;
@@ -90,7 +91,7 @@ int main(){
     __SA0_OPEN(saTemplate);
     __SE0_OPEN((void *)&mat2[0][0], seTemplate);
     __SE1_OPEN((void *)&mat1[0][0], seTemplate2);
-    auto start = chrono::high_resolution_clock::now();
+    gettimeofday(&start, NULL);
     for(int times = 0;times < row1*ceil(col2/(float)vec_len);times++){
         int_vec vOutC = (int_vec)(0);
         for(int cc = 0;cc < col1;cc+=1){
@@ -102,8 +103,8 @@ int main(){
         int_vec * addr = strm_agen<0, int_vec>::get_adv(&res2[0][0]);
         __vstore_pred(pred, addr, vOutC);
     }
-    auto stop = chrono::high_resolution_clock::now();
-
+    gettimeofday(&stop, NULL);
+    
     for(int r = 0;r < row1;r++){
         for(int c = 0;c < col2;c++){
             if(res[r][c] != res2[r][c]){
@@ -118,7 +119,13 @@ int main(){
     cout<<"Iteration 1 : "<<iteration1<<endl;
     cout<<"Iteration 2 : "<<iteration2<<endl;
     cout<<"My Code is "<<(iteration1/iteration2)<<" times better than Scalar Code"<<endl;
-    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-    cout <<"\n"<< "Time taken by Add matrix normal function: " << duration.count() << " microseconds" << endl;
  
+    double elapsed_time = (stop.tv_sec - start.tv_sec) + (stop.tv_usec - start.tv_usec) / 1e6;
+    // double estimated_cycles = elapsed_time * CPU_FREQ;
+ 
+    printf("Elapsed time: %f milliseconds\n", elapsed_time);
+    // printf("Estimated cycle count: %.0f cycles\n", estimated_cycles);
+    // auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+    // cout <<"\n"<< "Time taken by Add matrix normal function: " << duration.count() << " microseconds" << endl;
+    // TI_profile_stop();
 }
