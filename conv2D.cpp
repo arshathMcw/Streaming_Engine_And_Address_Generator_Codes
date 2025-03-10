@@ -11,10 +11,10 @@ using namespace c7x;
 int main(){
     struct timeval start, stop;
     int in_channel=1 ,out_channel=1, input_height = 16 , input_width = 16 , kernel_height = 3  , kernel_width = 3;
-    int stridex = 3,stridey = 1;
-    int padding  = 1;
+    int stridex = 1,stridey = 1;
+    int padding  = 0;
     int output_height = ((input_height + (2 * padding) - kernel_height) / stridex) + 1;
-    int output_width = ((input_width + (2 * padding) - kernel_width) / stridey) + 1;
+    int output_width = ((input_width + (2 * padding) - kernel_width) /   stridey) + 1;
     int inputwop[in_channel][input_height][input_width],kernel[out_channel][in_channel][kernel_height][kernel_width];
     int normal_op[out_channel][output_height][output_width],convoluted_op[out_channel][output_height][output_width];
     int cnt = 0;
@@ -26,22 +26,31 @@ int main(){
             }
         }
     }
+    cout<<"Input : "<<endl;
     for(int ch = 0;ch < in_channel;ch++){
         for(int h = 0;h < input_height;h++){
             for(int w = 0;w < input_width;w++){
                 inputwop[ch][h][w] = ch+h+w;
+                cout<<inputwop[ch][h][w]<<" ";
             }
+            cout<<endl;
         }
+        cout<<endl;
     }
     cnt = 0;
+    cout<<"Kernel : "<<endl;
     for(int och = 0;och < out_channel;och++){
         for(int ich = 0;ich < in_channel;ich++){
             for(int h = 0;h < kernel_height;h++){
                 for(int w = 0;w < kernel_width;w++){
                     kernel[och][ich][h][w] = och+ich+h+w;
+                    cout<<kernel[och][ich][h][w]<<" ";
                 }
+                cout<<endl;
             }
+            cout<<endl;
         }
+        cout<<endl;
     }
 
     // For paddding
@@ -72,7 +81,7 @@ int main(){
     //     }
     //     cout<<endl;
     // }
-
+    // NHWC = 
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
     saTemplate.VECLEN    = sa_veclen<int_vec>::value;
     saTemplate.DIMFMT = __SA_DIMFMT_3D;
@@ -96,14 +105,14 @@ int main(){
                         for (int l = 0; l < kernel_width; l++) {
                             pixel = &input[x][(i * stridex) + k][(j*stridey) + l];
                             int_vec pixels = *(int_vec *)pixel;
+                            pixels.print();
                             int_vec kernelVal = (int_vec)kernel[ch][x][k][l]; 
+                            kernelVal.print();
                             sum = __vaddw_vvv(sum, __vmpyww_vvv(pixels, kernelVal));
                             iteration2++;
                         }
                     }
                 }
-                // *(int_vec *) (outIdx) = sum;
-                // outIdx += vec_len;
                 __vpred pred = strm_agen<0, int_vec>::get_vpred();
                 int_vec * addr = strm_agen<0, int_vec>::get_adv(&convoluted_op[0][0][0]);
                 __vstore_pred(pred, addr, sum);
@@ -160,7 +169,7 @@ int main(){
             }
         }
     }
-    // cout<<iteration1<<" "<<iteration2<<" "<<iteration1/iteration2<<endl;
+    cout<<iteration1<<" "<<iteration2<<" "<<iteration1/iteration2<<endl;
 }
 
 
