@@ -18,12 +18,7 @@ int main(){
     cin>>width;
     cout<<"Enter the Index [0 : Even , 1 : Odd] : ";
     cin>>idx;
-    int32_t **image = new int32_t*[height];
-    int32_t **output = new int32_t*[height];
-    for (int i = 0; i < height; i++) {
-        image[i] = new int32_t[width];
-        output[i] = new int32_t[width];
-    }
+    int32_t image[height][width],output[height][width];
     for(h = 0;h < height;h++){
         for(w = 0;w < width;w++){
             image[h][w] = cnt++;

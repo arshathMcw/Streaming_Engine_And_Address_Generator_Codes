@@ -16,12 +16,7 @@ int main(){
     cin>>width;
     cout<<"Enter the Index [0 : Even , 1 : Odd] : ";
     cin>>idx;
-    int32_t **image = new int32_t*[height];
-    int32_t **output = new int32_t*[height];
-    for (int i = 0; i < height; i++) {
-        image[i] = new int32_t[width];
-        output[i] = new int32_t[width];
-    }
+    int32_t image[height][width],output[height][width];
     for(h = 0;h < height;h++){
         for(w = 0;w < width;w++){
             image[h][w] = cnt++;
@@ -31,20 +26,14 @@ int main(){
     __SE_TEMPLATE_v1 seTemplate = __gen_SE_TEMPLATE_v1();
     seTemplate.ELETYPE = se_eletype<int_vec>::value;
     seTemplate.VECLEN  = se_veclen<long_vec>::value;   
-    seTemplate.DIMFMT = __SE_DIMFMT_3D;
-    seTemplate.ICNT0 = width+(width%2);
-    seTemplate.ICNT1 = height;  
-    seTemplate.DIM1 = width;
-    seTemplate.ICNT2 = height / 16;  
-    seTemplate.DIM2 = width * 16;
+    seTemplate.DIMFMT = __SE_DIMFMT_1D;
+    seTemplate.ICNT0 = width * height;
     seTemplate.DECIM   = __SE_DECIM_2;
     seTemplate.PROMOTE = __SE_PROMOTE_2X_SIGNEXT;
     __SA_TEMPLATE_v1 saTemplate = __gen_SA_TEMPLATE_v1();
     saTemplate.VECLEN    = sa_veclen<int_vec>::value;
-    saTemplate.DIMFMT = __SA_DIMFMT_2D;
-    saTemplate.ICNT0 = width ;
-    saTemplate.ICNT1 = height; 
-    saTemplate.DIM1 = width; 
+    saTemplate.DIMFMT = __SA_DIMFMT_1D;
+    saTemplate.ICNT0 = width * height;
 
     __SA0_OPEN(saTemplate);
     __SE0_OPEN((void *)&image[0][idx], seTemplate);
@@ -68,4 +57,10 @@ int main(){
     cout << "Time taken by program is : " << fixed
          << time_taken << setprecision(6);
     cout << " sec" << endl;
+    // for(h = 0;h < height;h++){
+    //     for(w = 0;w < width;w++){
+    //         cout<<output[h][w]<<" ";
+    //     }
+    //     cout<<endl;
+    // }
 }
