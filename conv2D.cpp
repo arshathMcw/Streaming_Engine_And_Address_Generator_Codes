@@ -16,13 +16,13 @@ int main(){
     int output_height = ((input_height + (2 * padding) - kernel_height) / stridex) + 1;
     int output_width = ((input_width + (2 * padding) - kernel_width) / stridey) + 1;
     int inputwop[in_channel][input_height][input_width],kernel[out_channel][in_channel][kernel_height][kernel_width];
-    int output2[out_channel][output_height][output_width],output[out_channel][output_height][output_width];
+    int normal_op[out_channel][output_height][output_width],convoluted_op[out_channel][output_height][output_width];
     int cnt = 0;
     for(int ch = 0;ch < out_channel;ch++){
         for(int h = 0;h < output_height;h++){
             for(int w = 0;w < output_width;w++){
-                output2[ch][h][w] = 0;
-                output[ch][h][w] = 0;
+                normal_op[ch][h][w] = 0;
+                convoluted_op[ch][h][w] = 0;
             }
         }
     }
@@ -45,10 +45,13 @@ int main(){
     }
 
     // For paddding
-    int input[in_channel][input_height+2*padding][input_width+2*padding];
+    int new_input_height = input_height+(2*padding);
+    int new_input_width = input_width+(2*padding);
+    int input[in_channel][new_input_height][new_input_width];
+    cout<<input_height<<" "<<input_height+(2*padding)<<endl;
     for(int ch = 0;ch < in_channel;ch++){
-        for(int h = 0;h < input_height;h++){
-            for(int w = 0;w < input_width;w++){
+        for(int h = 0;h < new_input_height;h++){
+            for(int w = 0;w < new_input_width;w++){
                 input[ch][h][w] = 0;
             }
         }
@@ -60,7 +63,15 @@ int main(){
             }
         }
     }
-
+    for(int ch = 0;ch < in_channel;ch++){
+        for(int h = 0;h < new_input_height;h++){
+            for(int w = 0;w < new_input_width;w++){
+                cout<<input[ch][h][w]<<" ";
+            }
+            cout<<endl;
+        }
+        cout<<endl;
+    }
     // for(int ch = 0;ch < in_channel;ch++){
     //     for(int h = 0;h < input_height;h++){
     //         for(int w = 0;w < input_width;w++){
@@ -104,7 +115,7 @@ int main(){
                 // *(int_vec *) (outIdx) = sum;
                 // outIdx += vec_len;
                 __vpred pred = strm_agen<0, int_vec>::get_vpred();
-                int_vec * addr = strm_agen<0, int_vec>::get_adv(&output[0][0][0]);
+                int_vec * addr = strm_agen<0, int_vec>::get_adv(&convoluted_op[0][0][0]);
                 __vstore_pred(pred, addr, sum);
             }
         }
@@ -118,47 +129,41 @@ int main(){
                 for(int cch = 0;cch < in_channel;cch++){
                     for(int rr = 0; rr < kernel_height; rr++) {
                         for(int cc = 0; cc < kernel_width; cc++) {
-                            int input_r = r * stridex + rr;
-                            int input_c = c * stridey + cc;
-                            // res += (input[cch][(r*stridex)+rr][(c*stridey)+cc] * kernel[ch][cch][rr][cc]);
-                            if (input_r < input_height && input_c < input_width) {
-                                res += (input[cch][input_r][input_c] * kernel[ch][cch][rr][cc]);
-                            }
-
+                            res += (input[cch][(r*stridex)+rr][(c*stridey)+cc] * kernel[ch][cch][rr][cc]);
                             iteration1++;
                         }
                     }
                 }
-                output2[ch][r][c] = res;
+                normal_op[ch][r][c] = res;
             }
             
         }
     }
     
+    cout<<"Convoluted Conv : "<<endl;
     for(int ch = 0;ch < out_channel;ch++){
         for(int h = 0;h < output_height;h++){
             for(int w = 0;w < output_width;w++){
-                cout<<output[ch][h][w]<<" ";
+                cout<<convoluted_op[ch][h][w]<<" ";
             }
             cout<<endl;
         }
         cout<<endl;
     }
-    
+    cout<<"Noraml Conv : "<<endl;
     for(int ch = 0;ch < out_channel;ch++){
         for(int h = 0;h < output_height;h++){
             for(int w = 0;w < output_width;w++){
-                cout<<output2[ch][h][w]<<" ";
+                cout<<normal_op[ch][h][w]<<" ";
             }
             cout<<endl;
         }
         cout<<endl;
     }
-
     for(int ch = 0;ch < out_channel;ch++){
         for(int h = 0;h < output_height;h++){
             for(int w = 0;w < output_width;w++){
-                if(output[ch][h][w] != output2[ch][h][w]){
+                if(convoluted_op[ch][h][w] != normal_op[ch][h][w]){
                     cout<<"They are not equal"<<endl;
                     return 0;
                 }
