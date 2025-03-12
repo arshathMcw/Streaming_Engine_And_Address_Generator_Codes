@@ -52,7 +52,6 @@ int main() {
         }
     }
     int patch_size = in_channel * kernel_h * kernel_w ;
-    // int col[patch_size][col_size];
     int** col = new int*[patch_size];
     for (int i = 0; i < patch_size; i++) {
         col[i] = new int[col_size];
@@ -137,17 +136,6 @@ int main() {
             }
         }
     }
-    // for (int oc = 0; oc < out_channel; oc++) {
-        //     cout << "Output Channel " << oc + 1 << ":\n";
-        //     for (int i = 0; i < output_h; i++) {
-            //         for (int j = 0; j < output_w; j++) {
-    //             cout << output[oc][i][j] << " ";
-    //         }
-    //         cout << endl;
-    //     }
-    //     cout << endl;
-    // }
-
     cout<<"For Img Convolution : "<<endl;
     double elapsed_time = (stop.tv_sec - start.tv_sec) + (stop.tv_usec - start.tv_usec) / 1e6;
     double estimated_cycles = elapsed_time * CPU_FREQ;

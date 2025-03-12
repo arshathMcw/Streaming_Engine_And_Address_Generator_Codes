@@ -99,7 +99,7 @@ int main(){
     double estimated_cycles = elapsed_time * CPU_FREQ;
     printf("Estimated cycle count: %.0f cycles\n", estimated_cycles);
     cout << "Time taken by program is : " << fixed
-         << elapsed_time << setprecision(6);
+    << elapsed_time << setprecision(6);
     cout << " sec" << endl;
     int iteration1 = 0;
     gettimeofday(&start2, NULL);
@@ -139,8 +139,6 @@ int main(){
     cout << "Time taken by program is : " << fixed
     << elapsed_time2 << setprecision(6);
     cout << " sec" << endl;    
-    
-    
     cout<<"They Are Equal"<<endl;
     cout<<iteration1<<" "<<iteration2<<" "<<iteration1/iteration2<<endl;
 }
